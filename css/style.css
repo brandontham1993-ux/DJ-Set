@@ -510,6 +510,35 @@ kbd {
 }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
 
+/* ------------------------------------------------------------- touch basics */
+html { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
+body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+button, .pad, .knob, .fader, .jog, canvas { -webkit-touch-callout: none; -webkit-user-select: none; }
+
+#tabbar, #dock, .only-touch { display: none; }
+.touch .only-touch { display: block; }
+.touch .only-keys { display: none; }
+.touch #app kbd { display: none; } /* key hints are useless without a keyboard */
+
+/* bigger targets for fingers */
+@media (pointer: coarse) {
+  .toggle { padding: 9px 12px; }
+  .mini { padding: 8px 8px; }
+  .btn.small { padding: 11px 8px; }
+  .pad { height: 56px; }
+  .kill { width: 30px; height: 30px; font-size: 11px; }
+  .channel .knob { width: 60px; }
+  .fx-row select { padding: 10px 6px; }
+  .fader.vertical { width: 48px; }
+  .fader.vertical .fader-thumb { height: 32px; }
+  .fader.horizontal { height: 46px; }
+  .fader.horizontal .fader-thumb { width: 34px; }
+  .crossfader { height: 46px; }
+  .pitch-col { width: 58px; }
+  .tracks td { padding: 8px; }
+  .tracks td.load button { padding: 8px 15px; }
+}
+
 /* ------------------------------------------------------------- responsive */
 @media (max-width: 1100px) {
   .console { grid-template-columns: 1fr 1fr; }
@@ -517,9 +546,121 @@ kbd {
   .mixer-channels { max-width: 420px; margin: 0 auto; }
   .xfader-block { max-width: 420px; margin-left: auto; margin-right: auto; }
 }
-@media (max-width: 720px) {
-  #app { padding: 8px 16px 20px; }
-  .console { grid-template-columns: 1fr; }
-  .mixer { grid-row: auto; }
+
+/* Phones (portrait, or landscape with a short screen): tabs + bottom dock */
+@media (max-width: 900px), (max-height: 520px) and (pointer: coarse) {
+  #app { padding: 0 12px calc(104px + env(safe-area-inset-bottom)); }
+  .topbar { padding-top: max(8px, env(safe-area-inset-top)); margin-bottom: 6px; gap: 8px; }
+  .brand { font-size: 15px; }
+  .master-meter { width: 64px; }
+  .master .knob { width: 40px; }
+
+  .stage { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 4px 0 8px; }
+  .waveforms { margin-bottom: 6px; }
+  .wave-main { height: 56px; }
+
+  #tabbar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 4px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  #tabbar button {
+    border: 0;
+    background: transparent;
+    padding: 10px 4px;
+    border-radius: 7px;
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  #tabbar button.on { background: var(--panel-2); color: var(--text); }
+  #tabbar .tab-a.on { color: var(--a); box-shadow: inset 0 -2px 0 var(--a); }
+  #tabbar .tab-b.on { color: var(--b); box-shadow: inset 0 -2px 0 var(--b); }
+
+  .console { display: block; }
+  .console > section, .library { display: none; margin-top: 0; }
+  body[data-tab=A] #deck-A,
+  body[data-tab=B] #deck-B,
+  body[data-tab=mixer] #mixer,
+  body[data-tab=library] .library { display: block; }
+  .mixer { width: auto; }
+  .mixer-channels, .xfader-block { max-width: 460px; margin-left: auto; margin-right: auto; }
+  .fader-wrap { height: 190px; }
+  .channel { gap: 2px; }
+  .channel .knob { width: 50px; }
+  .table-wrap { max-height: none; }
   .help-grid { grid-template-columns: 1fr; }
+
+  #dock {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    gap: 10px;
+    align-items: center;
+    padding: 8px max(10px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    background: rgba(12, 14, 20, 0.96);
+    border-top: 1px solid var(--line);
+    backdrop-filter: blur(8px);
+    user-select: none;
+  }
+  .dock-deck { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .dock-btns { display: flex; gap: 5px; }
+  .dock-btns button {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--panel-2);
+    font-weight: 800;
+    font-size: 11px;
+    touch-action: none;
+  }
+  .dock-btns .dock-play { font-size: 17px; }
+  .dock-deck[data-deck=A] .dock-play { border-color: var(--a); color: var(--a); }
+  .dock-deck[data-deck=B] .dock-play { border-color: var(--b); color: var(--b); }
+  .dock-btns .dock-play.on { background: #123524; border-color: var(--good); color: #86efac; }
+  .dock-btns button.pressed, .dock-btns button:active { background: #2a3142; }
+  .dock-time { font: 600 11px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .dock-mid { flex: 1; min-width: 0; }
+  .dock-labels { display: flex; justify-content: space-between; font-size: 9px; font-weight: 700; color: var(--muted); margin-bottom: 2px; }
+  .dock-labels .a { color: var(--a); font-size: 12px; }
+  .dock-labels .b { color: var(--b); font-size: 12px; }
+  .dock-xfader { height: 44px; }
+
+  #toast { bottom: calc(112px + env(safe-area-inset-bottom)); }
+}
+
+/* narrow portrait phones */
+.lbl-short { display: none; }
+@media (max-width: 560px) {
+  .topbar { flex-wrap: nowrap; }
+  .brand-text, .top-controls .lbl, .master-meter, .master .knob-label { display: none; }
+  .top-controls .lbl-short { display: inline; }
+  .top-controls { gap: 6px; flex-wrap: nowrap; }
+  .master .knob { width: 38px; }
+  .dock-btns .dock-sync { display: none; }
+  .tracks th:nth-child(3), .tracks td:nth-child(3),
+  .tracks th:nth-child(4), .tracks td:nth-child(4) { display: none; }
+  .tracks td.title { white-space: normal; }
+  .deck, .mixer, .library { padding: 10px; }
+  .lib-note { min-width: 0; }
+  .jog { width: min(180px, 100%); }
+  .loop-row .btn { min-width: 52px; }
+}
+
+/* phones held sideways: little height, so let the waveforms scroll away */
+@media (max-height: 520px) and (pointer: coarse) {
+  .stage { position: static; }
+  .wave-main { height: 44px; }
+  .jog { width: min(150px, 100%); }
+  .pitch-fader { height: 150px; }
+  .fader-wrap { height: 170px; }
+  .dock-btns button { width: 44px; height: 42px; }
 }

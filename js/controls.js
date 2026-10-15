@@ -1,7 +1,8 @@
 /*
- * Mouse-driven mixer controls.
+ * Mixer controls for mouse and touch (each finger is tracked separately).
  *   Knob:  drag up/down (hold Shift for fine), scroll wheel, double-click to reset.
  *   Fader: drag, click on the track to jump, scroll wheel, double-click to reset.
+ *   On touch screens a double tap resets.
  */
 (function (root) {
   'use strict';
@@ -20,6 +21,15 @@
     const [x1, y1] = polar(cx, cy, r, Math.max(a0, a1));
     const large = Math.abs(a1 - a0) > 180 ? 1 : 0;
     return `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`;
+  }
+
+  /** Touch screens don't fire dblclick reliably, so detect a double tap ourselves. */
+  function isDoubleTap(ctrl, e) {
+    if (e.pointerType === 'mouse') return false;
+    const now = performance.now();
+    const hit = now - (ctrl._lastTap || 0) < 320;
+    ctrl._lastTap = hit ? 0 : now;
+    return hit;
   }
 
   class Knob {
@@ -56,16 +66,22 @@
       el.addEventListener('pointerdown', (e) => {
         if (e.button !== 0) return;
         e.preventDefault();
+        if (isDoubleTap(this, e)) {
+          this.set(this.def);
+          return;
+        }
         el.setPointerCapture(e.pointerId);
         let lastY = e.clientY;
         el.classList.add('active');
         const move = (ev) => {
+          if (ev.pointerId !== e.pointerId) return;
           const dy = lastY - ev.clientY;
           lastY = ev.clientY;
           const sens = ev.shiftKey ? 600 : 160;
           this.set(this.value + (dy / sens) * (this.max - this.min));
         };
-        const up = () => {
+        const up = (ev) => {
+          if (ev.pointerId !== e.pointerId) return;
           el.classList.remove('active');
           el.removeEventListener('pointermove', move);
           el.removeEventListener('pointerup', up);
@@ -123,6 +139,10 @@
       el.addEventListener('pointerdown', (e) => {
         if (e.button !== 0) return;
         e.preventDefault();
+        if (isDoubleTap(this, e)) {
+          this.set(this.def);
+          return;
+        }
         el.setPointerCapture(e.pointerId);
         const rect = el.getBoundingClientRect();
         const onThumb = e.target === this.thumb;
@@ -134,11 +154,13 @@
         const basePos = onThumb ? startPos : this.vertical ? e.clientY : e.clientX;
         el.classList.add('active');
         const move = (ev) => {
+          if (ev.pointerId !== e.pointerId) return;
           const d = ((this.vertical ? ev.clientY : ev.clientX) - basePos) / size;
           const scale = ev.shiftKey ? 0.25 : 1;
           this._setFraction(base + d * scale);
         };
-        const up = () => {
+        const up = (ev) => {
+          if (ev.pointerId !== e.pointerId) return;
           el.classList.remove('active');
           el.removeEventListener('pointermove', move);
           el.removeEventListener('pointerup', up);

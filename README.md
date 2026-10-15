@@ -16,6 +16,22 @@ You don't need to install or build anything.
 Click **Start the session**. Deck A loads *Neon Arcade* and deck B loads *Pulse Theory*, ready to mix. Press **?** for every shortcut.
 Headphones are recommended.
 
+## On your phone
+
+The app also works in your phone's browser (iPhone Safari, Android Chrome). To get it onto your phone:
+
+1. Host it, e.g. with **GitHub Pages**: Settings → Pages → deploy from your branch.
+2. Open that link on the phone. Tap **Share → Add to Home Screen** for a full-screen app.
+
+On a phone:
+
+- **Tabs** under the waveforms switch between **Deck A · Mixer · Deck B · Library**.
+- The **bottom bar** always has play, cue, sync and the crossfader for both decks.
+- **Gestures:** slide knobs up or down, drag faders, and touch the jog wheel to scratch. Double-tap a knob or fader to reset it. Press and hold a hot cue to delete it.
+- **Multi-touch** works: for example, move the crossfader and a volume fader with two fingers at once.
+- Turning the phone sideways gives you more room.
+- **On iPhone:** use the media volume buttons. The app plays even with the silent switch on, but if you hear nothing, check that Silent Mode is off.
+
 ## What you can practise
 
 | Feature | Details |

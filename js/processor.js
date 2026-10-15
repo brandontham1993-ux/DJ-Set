@@ -4,6 +4,7 @@
  * disk (file://), where addModule() of a real file is blocked.
  *
  * Positions are in buffer samples. Rates are buffer samples per output sample.
+ * Audio is stored as Int16 (half the memory of Float32, which matters on phones).
  */
 (function (root) {
   'use strict';
@@ -131,6 +132,7 @@
           // Fade out as the platter slows so a stopped deck is silent (no DC/clicks).
           let amp = Math.abs(this.rate) / (0.03 * this.srRatio);
           if (amp > 1) amp = 1;
+          amp *= 1 / 32768;
           oL[i] = (L[i0] + (L[i0 + 1] - L[i0]) * f) * amp;
           if (oR !== oL) oR[i] = (R[i0] + (R[i0 + 1] - R[i0]) * f) * amp;
         }

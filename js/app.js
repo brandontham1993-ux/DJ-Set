@@ -11,6 +11,8 @@
   const $$ = (sel, el) => Array.from((el || document).querySelectorAll(sel));
 
   const ACCENT = { A: '#38bdf8', B: '#fb923c' };
+  // phones / tablets: no hover and a finger-sized pointer
+  const TOUCH = !!(root.matchMedia && root.matchMedia('(hover: none) and (pointer: coarse)').matches);
   const SEC_PER_REV = 1.8; // 33 1/3 RPM
 
   // ------------------------------------------------------------------ key map
@@ -176,6 +178,24 @@
     buildMixerUI();
   }
 
+  /** Phone layout: tabs to switch panels and a bottom dock with the essentials. */
+  function setupMobile() {
+    const setTab = (tab) => {
+      if (document.body.dataset.tab && document.body.dataset.tab !== tab) root.scrollTo(0, 0);
+      document.body.dataset.tab = tab;
+      $$('#tabbar button').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
+    };
+    $$('#tabbar button').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
+    setTab('A');
+    for (const id of ['A', 'B']) {
+      const deck = app.decks[id];
+      const dock = $(`#dock .dock-deck[data-deck=${id}]`);
+      hold($('.dock-cue', dock), () => deck.cueDown(), () => deck.cueUp());
+      $('.dock-play', dock).addEventListener('click', () => deck.togglePlay());
+      $('.dock-sync', dock).addEventListener('click', () => actions.sync(id));
+    }
+  }
+
   function buildDeckUI(id) {
     const deck = app.decks[id];
     const el = $('#deck-' + id);
@@ -212,17 +232,6 @@
     });
 
     // transport buttons
-    const hold = (btn, down, up) => {
-      btn.addEventListener('pointerdown', (e) => {
-        if (e.button !== 0) return;
-        down();
-        const release = () => {
-          up();
-          root.removeEventListener('pointerup', release);
-        };
-        root.addEventListener('pointerup', release);
-      });
-    };
     hold(ui.cueBtn, () => deck.cueDown(), () => deck.cueUp());
     hold($('[data-act=nudge-back]', el), () => deck.setBend(-0.04), () => deck.setBend(0));
     hold($('[data-act=nudge-fwd]', el), () => deck.setBend(0.04), () => deck.setBend(0));
@@ -245,10 +254,28 @@
     });
 
     ui.pads.forEach((pad, i) => {
+      let pressTimer = null;
       pad.addEventListener('pointerdown', (e) => {
-        if (e.button === 2 || e.shiftKey) deck.deleteHotCue(i);
-        else if (e.button === 0) deck.hotCue(i);
+        if (e.button === 2 || e.shiftKey) {
+          deck.deleteHotCue(i);
+          return;
+        }
+        if (e.button !== 0) return;
+        const wasSet = deck.hotCues[i] != null;
+        deck.hotCue(i);
+        // long-press a set pad to delete it (the touch-screen version of right-click)
+        if (wasSet) {
+          pressTimer = setTimeout(() => {
+            deck.deleteHotCue(i);
+            if (navigator.vibrate) navigator.vibrate(30);
+            toast(`Hot cue ${i + 1} deleted`);
+          }, 650);
+        }
       });
+      const cancel = () => clearTimeout(pressTimer);
+      pad.addEventListener('pointerup', cancel);
+      pad.addEventListener('pointerleave', cancel);
+      pad.addEventListener('pointercancel', cancel);
       pad.addEventListener('contextmenu', (e) => e.preventDefault());
     });
 
@@ -309,9 +336,17 @@
       $$('.kill', ch).forEach((b) => b.addEventListener('click', () => deck.toggleKill(b.dataset.band)));
       $('.pfl', ch).addEventListener('click', () => actions.pfl(id));
     }
+    const setXf = (v, from) => {
+      eng.setCrossfader(v);
+      for (const f of [app.xfader, app.dockXfader]) if (f && f !== from) f.set(v, false);
+    };
     app.xfader = new DJ.Fader($('.crossfader'), {
       orientation: 'horizontal', min: -1, max: 1, value: 0, centerMark: true, title: 'Crossfader',
-      onChange: (v) => eng.setCrossfader(v),
+      onChange: (v) => setXf(v, app.xfader),
+    });
+    app.dockXfader = new DJ.Fader($('#dock .dock-xfader'), {
+      orientation: 'horizontal', min: -1, max: 1, value: 0, centerMark: true, title: 'Crossfader',
+      onChange: (v) => setXf(v, app.dockXfader),
     });
     const curveBtn = $('.xf-curve');
     curveBtn.addEventListener('click', () => {
@@ -321,6 +356,26 @@
     app.masterKnob = new DJ.Knob($('#master-knob'), {
       min: 0, max: 1, value: 0.8, label: 'MASTER', onChange: (v) => eng.setMasterVolume(v),
     });
+  }
+
+  /** Momentary button: down on press, up when that same finger/mouse lets go. */
+  function hold(btn, down, up) {
+    btn.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      down();
+      btn.classList.add('pressed');
+      const release = (ev) => {
+        if (ev.pointerId !== e.pointerId) return;
+        btn.classList.remove('pressed');
+        up();
+        root.removeEventListener('pointerup', release);
+        root.removeEventListener('pointercancel', release);
+      };
+      root.addEventListener('pointerup', release);
+      root.addEventListener('pointercancel', release);
+    });
+    btn.addEventListener('contextmenu', (e) => e.preventDefault());
   }
 
   // ------------------------------------------------------------------ jog wheel
@@ -344,6 +399,7 @@
       if (scratch) deck.scratchStart();
       jog.classList.add('touched');
       const move = (ev) => {
+        if (ev.pointerId !== e.pointerId) return;
         const a = angleOf(ev);
         let d = a - last;
         if (d > Math.PI) d -= 2 * Math.PI;
@@ -360,7 +416,8 @@
           bendTimer = setTimeout(() => deck.setBend(0), 70);
         }
       };
-      const up = () => {
+      const up = (ev) => {
+        if (ev.pointerId !== e.pointerId) return;
         jog.classList.remove('touched');
         if (scratch) deck.scratchEnd();
         else deck.setBend(0);
@@ -433,6 +490,10 @@
         ui.dots.forEach((d, i) => d.classList.toggle('on', i === inBar && pos >= deck.firstBeat - 0.01));
       }
       ui.playBtn.classList.toggle('on', deck.playing);
+      if (!ui.dock) ui.dock = $(`#dock .dock-deck[data-deck=${id}]`);
+      $('.dock-play', ui.dock).classList.toggle('on', deck.playing);
+      $('.dock-play', ui.dock).textContent = deck.playing ? '❚❚' : '▶';
+      $('.dock-time', ui.dock).textContent = deck.loaded ? '-' + U.formatTime((deck.length - pos) / deck.tempoRatio).slice(0, -2) : '--';
       $('.play-icon', ui.playBtn).textContent = deck.playing ? '❚❚' : '▶';
       ui.cueBtn.classList.toggle('blink', deck.loaded && !deck.playing && Math.abs(pos - deck.cuePoint) > 0.02);
       const h = meterHeight(id, deck.level());
@@ -887,7 +948,11 @@
     buildUI();
     setupKeyboard();
     setupTopBar();
+    setupMobile();
     buildHelp();
+    // phones suspend audio when locked / backgrounded: wake it on return or on the next touch
+    document.addEventListener('visibilitychange', () => !document.hidden && app.engine.resume());
+    root.addEventListener('pointerdown', () => app.engine.resume(), true);
     initLibrary();
     $('#start-overlay').hidden = true;
     requestAnimationFrame(frame);
@@ -896,10 +961,11 @@
     const first = app.library.findIndex((t) => t.uid === 'gen-neon-arcade');
     const second = app.library.findIndex((t) => t.uid === 'gen-pulse-theory');
     await Promise.all([loadToDeck(app.library[first], 'A'), loadToDeck(app.library[second], 'B')]);
-    toast('Ready! Press F to start deck A — press ? for all keys', 4000);
+    toast(TOUCH ? 'Ready! Tap ▶ A at the bottom to start deck A — tap Help for tips' : 'Ready! Press F to start deck A — press ? for all keys', 4000);
   }
 
   root.addEventListener('DOMContentLoaded', () => {
+    if (TOUCH) document.documentElement.classList.add('touch');
     $('#start-btn').addEventListener('click', start);
   });
 })(typeof window !== 'undefined' ? window : globalThis);

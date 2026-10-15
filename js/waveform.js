@@ -46,11 +46,13 @@
         let lastX = e.clientX;
         deck.scratchStart();
         const move = (ev) => {
+          if (ev.pointerId !== e.pointerId) return;
           const secPerCssPx = this.seconds / canvas.clientWidth;
           deck.scratchMove(-(ev.clientX - lastX) * secPerCssPx);
           lastX = ev.clientX;
         };
-        const up = () => {
+        const up = (ev) => {
+          if (ev.pointerId !== e.pointerId) return;
           deck.scratchEnd();
           canvas.removeEventListener('pointermove', move);
           canvas.removeEventListener('pointerup', up);

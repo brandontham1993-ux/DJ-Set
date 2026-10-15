@@ -15,6 +15,18 @@
 
   const ramp = (param, value, ctx, tc) => param.setTargetAtTime(value, ctx.currentTime, tc || 0.012);
 
+  function toInt16(f32) {
+    const out = new Int16Array(f32.length);
+    for (let i = 0; i < f32.length; i++) {
+      const v = f32[i] * 32767;
+      out[i] = v > 32767 ? 32767 : v < -32768 ? -32768 : v;
+    }
+    return out;
+  }
+
+  const IOS = typeof navigator !== 'undefined' &&
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+
   class Deck {
     constructor(engine, id) {
       this.engine = engine;
@@ -146,8 +158,10 @@
       this._pos = this.cuePoint * sampleRate;
       this._rate = 0;
       this._t = this.ctx.currentTime;
-      const transfer = R && R !== L ? [L.buffer, R.buffer] : [L.buffer];
-      this.player.port.postMessage({ type: 'load', L, R: R || L, sampleRate, seq: this._seq }, transfer);
+      const L16 = toInt16(L);
+      const R16 = R && R !== L ? toInt16(R) : L16;
+      const transfer = R16 !== L16 ? [L16.buffer, R16.buffer] : [L16.buffer];
+      this.player.port.postMessage({ type: 'load', L: L16, R: R16, sampleRate, seq: this._seq }, transfer);
       this._sendTempo();
       this.seek(this.cuePoint);
       this._updateEcho();
@@ -529,8 +543,15 @@
   class AudioEngine {
     async init() {
       const Ctx = root.AudioContext || root.webkitAudioContext;
+      // iPhone: play through the media channel so the silent switch doesn't mute the decks
+      if (root.navigator && navigator.audioSession) {
+        try { navigator.audioSession.type = 'playback'; } catch (e) { /* not supported */ }
+      } else if (IOS) {
+        this._unlockSilentSwitch();
+      }
       this.ctx = new Ctx({ latencyHint: 'interactive' });
       const ctx = this.ctx;
+      ctx.resume();
       const src = root.DJ.PROCESSOR_SOURCE;
       try {
         await ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([src], { type: 'application/javascript' })));
@@ -587,7 +608,25 @@
     }
 
     resume() {
-      if (this.ctx.state !== 'running') this.ctx.resume();
+      if (this.ctx && this.ctx.state !== 'running') this.ctx.resume().catch(() => {});
+    }
+
+    /** Older iOS: a looping silent <audio> switches the page to the media channel. */
+    _unlockSilentSwitch() {
+      const sr = 8000, n = sr / 10;
+      const buf = new ArrayBuffer(44 + n * 2);
+      const v = new DataView(buf);
+      const str = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+      str(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); str(8, 'WAVEfmt ');
+      v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+      v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+      str(36, 'data'); v.setUint32(40, n * 2, true);
+      const el = document.createElement('audio');
+      el.src = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+      el.loop = true;
+      el.setAttribute('playsinline', '');
+      el.play().catch(() => {});
+      this._silent = el;
     }
 
     _makeImpulse(seconds) {
