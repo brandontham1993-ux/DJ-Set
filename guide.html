@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07080c">
+  <title>Learn to DJ</title>
+  <meta name="description" content="A beginner-friendly, step-by-step course for learning to DJ with DJ Practice Lab, on a computer or a phone.">
+  <style>
+    :root {
+      --bg: #07080c;
+      --panel: #12151d;
+      --panel-2: #1a1e29;
+      --line: #262b38;
+      --text: #e6e9f0;
+      --muted: #9aa3b5;
+      --a: #38bdf8;
+      --b: #fb923c;
+      --good: #22c55e;
+      --warn: #ef4444;
+      --tip: #a78bfa;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 70px; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--a); }
+    kbd {
+      display: inline-block;
+      min-width: 1.6em;
+      padding: 0 5px;
+      border: 1px solid #3a4152;
+      border-bottom-width: 2px;
+      border-radius: 5px;
+      background: #0d1017;
+      color: #d5dbe7;
+      font: 600 13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .ui {
+      display: inline-block;
+      padding: 0 7px;
+      border-radius: 6px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      font-weight: 700;
+      font-size: 0.9em;
+      white-space: nowrap;
+    }
+    .a-col { color: var(--a); font-weight: 700; }
+    .b-col { color: var(--b); font-weight: 700; }
+
+    /* top bar */
+    .top {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px max(16px, env(safe-area-inset-left));
+      background: rgba(7, 8, 12, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+    .top .logo {
+      width: 26px; height: 26px; flex: none; border-radius: 50%;
+      background: radial-gradient(circle, #fff 0 12%, #111 13% 30%, var(--a) 31% 46%, #111 47% 60%, var(--b) 61% 78%, #111 79%);
+    }
+    .top b { font-size: 16px; }
+    .top .spacer { flex: 1; }
+    .mode { display: flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+    .mode button {
+      border: 0; background: transparent; color: var(--muted);
+      font: 700 13px system-ui, sans-serif; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+    }
+    .mode button.on { background: var(--panel-2); color: var(--text); }
+    .open-app {
+      background: linear-gradient(90deg, var(--a), var(--b));
+      color: #08101a; text-decoration: none; font-weight: 800; font-size: 14px;
+      padding: 8px 14px; border-radius: 999px; white-space: nowrap;
+    }
+
+    main { max-width: 860px; margin: 0 auto; padding: 24px 16px 80px; }
+    h1 { font-size: clamp(30px, 6vw, 44px); line-height: 1.15; margin: 18px 0 10px; }
+    h2 { font-size: 26px; line-height: 1.25; margin: 0 0 6px; }
+    h3 { font-size: 18px; margin: 26px 0 8px; }
+    p { margin: 0 0 14px; }
+    .lead { font-size: 18px; color: #c8cfdc; }
+
+    .toc {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+      padding: 16px 20px; margin: 22px 0 34px;
+    }
+    .toc h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; }
+    .toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 28px; }
+    .toc li { margin: 3px 0; break-inside: avoid; }
+    .toc a { color: var(--text); text-decoration: none; }
+    .toc a:hover { color: var(--a); }
+
+    section.lesson {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+      padding: 22px 22px 10px; margin: 0 0 26px;
+    }
+    .num {
+      display: inline-block; font: 800 12px system-ui, sans-serif; letter-spacing: 0.08em;
+      color: var(--muted); text-transform: uppercase; margin-bottom: 2px;
+    }
+    .goal {
+      display: flex; gap: 10px; align-items: flex-start;
+      background: #0e1a14; border: 1px solid #1d4d33; border-radius: 10px;
+      padding: 10px 14px; margin: 10px 0 18px; font-size: 15px;
+    }
+    .goal::before { content: '🎯'; }
+
+    ol.steps { list-style: none; counter-reset: step; padding: 0; margin: 0 0 16px; }
+    ol.steps > li {
+      counter-increment: step; position: relative; padding: 0 0 16px 44px; margin: 0;
+    }
+    ol.steps > li::before {
+      content: counter(step); position: absolute; left: 0; top: 0;
+      width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+      background: var(--panel-2); border: 1px solid #3a4152; font-weight: 800; font-size: 14px;
+    }
+    ol.steps > li:not(:last-child)::after {
+      content: ''; position: absolute; left: 15px; top: 34px; bottom: 4px; width: 1px; background: var(--line);
+    }
+
+    /* "how to do it" on each device */
+    .do { display: grid; gap: 6px; margin: 8px 0 4px; }
+    .do > span {
+      display: block; padding: 7px 12px; border-radius: 9px; font-size: 15px;
+      background: var(--panel-2); border: 1px solid var(--line);
+    }
+    .do .pc::before { content: '💻  '; }
+    .do .ph::before { content: '📱  '; }
+    body.mode-pc .ph, body.mode-phone .pc { display: none; }
+
+    .tip, .warn, .ear {
+      border-radius: 10px; padding: 10px 14px 10px 14px; margin: 6px 0 16px; font-size: 15px;
+      border: 1px solid;
+    }
+    .tip { background: #17132a; border-color: #3b2f6b; }
+    .tip::before { content: '💡 Tip: '; font-weight: 700; color: var(--tip); }
+    .warn { background: #2a1214; border-color: #6b2a2f; }
+    .warn::before { content: '⚠️ Watch out: '; font-weight: 700; color: #fca5a5; }
+    .ear { background: #10202a; border-color: #23506b; }
+    .ear::before { content: '👂 Listen for: '; font-weight: 700; color: var(--a); }
+
+    .table-wrap { overflow-x: auto; margin: 6px 0 18px; border: 1px solid var(--line); border-radius: 10px; }
+    table { border-collapse: collapse; width: 100%; font-size: 14px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { background: var(--panel-2); color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+    tr:last-child td { border-bottom: 0; }
+
+    figure { margin: 10px 0 18px; }
+    figure img { width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line); display: block; }
+    figure.phone img { max-width: 300px; margin: 0 auto; }
+    figcaption { color: var(--muted); font-size: 13px; margin-top: 6px; text-align: center; }
+
+    .timeline { display: flex; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); margin: 8px 0 6px; font-size: 12px; font-weight: 700; }
+    .timeline span { padding: 8px 4px; text-align: center; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .timeline .beat { background: #1e3a5f; }
+    .timeline .build { background: #23415a; }
+    .timeline .full { background: #3b2f6b; }
+    .timeline .quiet { background: #2a2f3b; color: var(--muted); }
+    .timeline-times { display: flex; font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+    .timeline-times span { text-align: left; }
+
+    .mixplan { display: grid; gap: 8px; margin: 6px 0 18px; }
+    .mixplan > div { display: grid; grid-template-columns: 92px 1fr; gap: 10px; align-items: start; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 15px; }
+    .mixplan b.t { font: 800 14px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--a); }
+
+    .checklist { list-style: none; padding: 0; margin: 0 0 16px; }
+    .checklist li { padding-left: 30px; position: relative; margin-bottom: 6px; }
+    .checklist li::before { content: '☐'; position: absolute; left: 4px; color: var(--good); font-size: 18px; line-height: 1.4; }
+
+    dl.glossary { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0 0 16px; }
+    dl.glossary dt { font-weight: 800; }
+    dl.glossary dd { margin: 0; color: #c8cfdc; }
+
+    footer { color: var(--muted); font-size: 13px; text-align: center; margin-top: 30px; }
+
+    @media (max-width: 640px) {
+      body { font-size: 15.5px; }
+      .top b { display: none; }
+      .open-app { padding: 7px 11px; font-size: 13px; }
+      .mode button { padding: 6px 9px; }
+      .toc ol { columns: 1; }
+      section.lesson { padding: 18px 14px 6px; border-radius: 14px; }
+      ol.steps > li { padding-left: 40px; }
+      .mixplan > div { grid-template-columns: 1fr; gap: 2px; }
+      dl.glossary { grid-template-columns: 1fr; }
+      dl.glossary dd { margin-bottom: 8px; }
+    }
+  </style>
+</head>
+<body class="mode-both">
+  <header class="top">
+    <span class="logo" aria-hidden="true"></span>
+    <b>Learn to DJ</b>
+    <span class="spacer"></span>
+    <div class="mode" role="group" aria-label="Show controls for">
+      <button data-mode="pc" title="Show computer (keyboard and mouse) controls">💻</button>
+      <button data-mode="phone" title="Show phone (touch) controls">📱</button>
+      <button data-mode="both" title="Show both">Both</button>
+    </div>
+    <a class="open-app" href="index.html" target="_blank" rel="noopener">Open the decks ↗</a>
+  </header>
+
+  <main>
+    <h1>Learn to DJ with DJ Practice Lab</h1>
+    <p class="lead">A step-by-step course for complete beginners. You'll go from pressing play for the first time to mixing a full set and recording it. Every step shows exactly which key to press or what to tap.</p>
+    <p>Use the <b>💻 / 📱</b> switch at the top to show controls for your computer, your phone, or both. Keep the decks open in another tab (<b>Open the decks ↗</b>) and follow along. Each lesson takes 10–20 minutes, and it's fine to repeat them as often as you like.</p>
+
+    <nav class="toc" aria-label="Contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#what">What a DJ actually does</a></li>
+        <li><a href="#setup">Get set up</a></li>
+        <li><a href="#tour">A tour of the screen</a></li>
+        <li><a href="#music">How dance music is built</a></li>
+        <li><a href="#l1">Lesson 1: Play, pause &amp; cue</a></li>
+        <li><a href="#l2">Lesson 2: The mixer</a></li>
+        <li><a href="#l3">Lesson 3: Your first mix</a></li>
+        <li><a href="#l4">Lesson 4: Beatmatching by ear</a></li>
+        <li><a href="#l5">Lesson 5: Cue points &amp; hot cues</a></li>
+        <li><a href="#l6">Lesson 6: EQ, filter &amp; echo transitions</a></li>
+        <li><a href="#l7">Lesson 7: Loops &amp; beat jumps</a></li>
+        <li><a href="#l8">Lesson 8: Mixing in key</a></li>
+        <li><a href="#l9">Lesson 9: Headphone cueing</a></li>
+        <li><a href="#l10">Lesson 10: Scratching basics</a></li>
+        <li><a href="#l11">Lesson 11: Play &amp; record a full set</a></li>
+        <li><a href="#plan">7-day practice plan</a></li>
+        <li><a href="#trouble">Common mistakes &amp; fixes</a></li>
+        <li><a href="#glossary">Glossary</a></li>
+        <li><a href="#cheat">Cheat sheet</a></li>
+      </ol>
+    </nav>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="what">
+      <span class="num">Start here</span>
+      <h2>What a DJ actually does</h2>
+      <p>A DJ plays songs one after another without the music ever stopping. The skill is in the <b>transition</b>, the 30 seconds or so where one song blends into the next. In a good transition:</p>
+      <ul>
+        <li>both songs play <b>at the same speed</b>, so their drums hit together (this is called <b>beatmatching</b>);</li>
+        <li>the new song comes in <b>at the right moment</b>, usually where one musical section ends and the next begins;</li>
+        <li>the two songs <b>don't fight each other</b>. You use the mixer to share out the bass, the volume and the melodies.</li>
+      </ul>
+      <p>DJ Practice Lab gives you everything you need for this: two <b>decks</b> (players) called <span class="a-col">A</span> and <span class="b-col">B</span>, a <b>mixer</b> in the middle that blends them, and a <b>library</b> of tracks. All the built-in music was made by the app itself, so you can practise, record and share your mixes freely with no copyright worries.</p>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="setup">
+      <span class="num">Before you begin</span>
+      <h2>Get set up</h2>
+      <ol class="steps">
+        <li>
+          <b>Open the app</b> at <a href="index.html" target="_blank" rel="noopener">brandontham1993-ux.github.io/DJ-Set</a>.
+          <div class="do">
+            <span class="pc">Use Chrome, Edge, Firefox or Safari. Make the window as big as you can.</span>
+            <span class="ph">Turn the phone <b>sideways</b> for the most room. To make it feel like an app, tap <b>Share → Add to Home Screen</b>.</span>
+          </div>
+        </li>
+        <li><b>Put on headphones</b> if you have them. You'll hear the details (like two kick drums slightly out of time) much more clearly. Wired, Bluetooth and laptop speakers all work.</li>
+        <li><b>Tap <span class="ui">Start the session</span>.</b> Browsers only allow sound after you tap something, which is why this button exists.</li>
+        <li><b>Wait a few seconds.</b> Each deck shows <i>"Composing track…"</i> while the app creates the music. Then deck <span class="a-col">A</span> loads <b>Neon Arcade</b> and deck <span class="b-col">B</span> loads <b>Pulse Theory</b>. These two are a deliberately easy first pair.</li>
+        <li>
+          <b>Check the volume.</b>
+          <div class="do">
+            <span class="pc">Use the <span class="ui">MASTER</span> knob at the top right, plus your computer's volume.</span>
+            <span class="ph">Use your phone's volume buttons. On iPhone, if you hear nothing, switch off Silent Mode and turn the media volume up.</span>
+          </div>
+        </li>
+      </ol>
+      <div class="tip">Leave this guide open in one tab and the decks in another, and switch between them as you go.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="tour">
+      <span class="num">Orientation</span>
+      <h2>A tour of the screen</h2>
+      <figure>
+        <img src="docs/screenshot.png" alt="The DJ Practice Lab screen on a computer: two waveforms at the top, deck A on the left, the mixer in the middle, deck B on the right and the library underneath." loading="lazy">
+        <figcaption>On a computer: waveforms on top, deck A · mixer · deck B, library below.</figcaption>
+      </figure>
+      <h3>The waveforms (top)</h3>
+      <p>Each deck's music is drawn as a scrolling picture. The line in the middle is "now". Music to the right is coming up, and music to the left (dimmed) has already played. The colours show the sound: <b style="color:#3078ff">blue = bass</b> (kick drums), <b style="color:#ffa62b">orange = middle</b> (snares, chords), <b>white = high</b> (hi-hats, cymbals).</p>
+      <p>The faint vertical lines are <b>beats</b>. Every 4th line is brighter: that's the start of a <b>bar</b>. These lines are your best friend for timing.</p>
+      <h3>Each deck (left and right)</h3>
+      <ul>
+        <li><b>Track name, BPM and key</b>, e.g. <i>Neon Arcade · 124.0 · 8A A minor</i>. BPM (beats per minute) is the song's speed.</li>
+        <li><b>Overview</b>: the whole song as a thin strip. Tap anywhere on it to jump there. The red strip at the end marks the last 30 seconds.</li>
+        <li><b>Time</b>: elapsed on the left, time remaining on the right (it flashes red in the last 30 seconds). The <b>4 dots</b> in the middle count the beats of each bar, and the square dot is beat 1.</li>
+        <li><b>Jog wheel</b> (the record), the <span class="ui">CUE</span> <span class="ui">▶</span> <span class="ui">SYNC</span> buttons, and the <b>pitch (tempo) fader</b> next to the record.</li>
+        <li><b>Hot cues 1–4</b>, <b>loop</b> buttons and an <b>effect</b> unit.</li>
+      </ul>
+      <h3>The mixer (middle)</h3>
+      <p>One column per deck: <span class="ui">TRIM</span> (input volume), the <span class="ui">HI</span> <span class="ui">MID</span> <span class="ui">LOW</span> EQ knobs with <span class="ui">K</span> (kill) buttons, a <span class="ui">FILTER</span> knob, a 🎧 headphone button, a level meter and the <b>volume fader</b>. Under both columns is the <b>crossfader</b>, which slides the sound from deck A (left) to deck B (right).</p>
+      <figure class="phone">
+        <img src="docs/screenshot-phone.png" alt="The app on a phone: waveforms at the top, tabs for Deck A, Mixer, Deck B and Library, and a bottom bar with cue, play and the crossfader." loading="lazy">
+        <figcaption>On a phone: tabs switch between Deck A · Mixer · Deck B · Library. The bottom bar always has CUE, ▶, SYNC and the crossfader.</figcaption>
+      </figure>
+      <div class="tip"><b>On a phone</b>, everything from the computer version is still there, split across the four tabs. On narrow portrait screens the SYNC button lives on each Deck tab; turn the phone sideways and it also appears in the bottom bar.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="music">
+      <span class="num">Theory, 3 minutes</span>
+      <h2>How dance music is built</h2>
+      <p>Dance music is extremely regular, and that's what makes DJing possible. Learn these four words:</p>
+      <ul>
+        <li><b>Beat</b>: one kick drum ("boom"). Count along: <i>1, 2, 3, 4</i>.</li>
+        <li><b>Bar</b>: 4 beats. On the waveform, a bar runs from one bright line to the next.</li>
+        <li><b>Phrase</b>: a group of 8 or 16 bars. Something changes at the start of every phrase: a new sound comes in, or the bass drops out.</li>
+        <li><b>Section</b>: the big parts of a song, made of phrases: intro, build, breakdown, drop, outro.</li>
+      </ul>
+      <p>Every club track in the library has the same DJ-friendly shape. Here is <b>Neon Arcade</b> (124 BPM):</p>
+      <div class="timeline" aria-hidden="true">
+        <span class="beat" style="flex:16">Intro · drums</span>
+        <span class="build" style="flex:8">Build</span>
+        <span class="full" style="flex:16">Groove</span>
+        <span class="quiet" style="flex:16">Breakdown</span>
+        <span class="full" style="flex:24">Drop · everything</span>
+        <span class="beat" style="flex:16">Outro · drums</span>
+      </div>
+      <div class="timeline-times" aria-hidden="true">
+        <span style="flex:16">0:00</span><span style="flex:8">0:30</span><span style="flex:16">0:46</span><span style="flex:16">1:17</span><span style="flex:24">1:48</span><span style="flex:16">2:34 → 3:05</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Section</th><th>Length</th><th>What you hear</th><th>Neon Arcade starts at</th></tr></thead>
+          <tbody>
+            <tr><td>Intro</td><td>16 bars</td><td>Just drums, perfect for mixing in</td><td>0:00</td></tr>
+            <tr><td>Build</td><td>8 bars</td><td>Bassline and clap arrive</td><td>0:30</td></tr>
+            <tr><td>Groove</td><td>16 bars</td><td>Chords join</td><td>0:46</td></tr>
+            <tr><td>Breakdown</td><td>16 bars</td><td>Drums stop, melody and pads, a rising "whoosh"</td><td>1:17</td></tr>
+            <tr><td>Drop</td><td>24 bars</td><td>Everything at once, the peak</td><td>1:48</td></tr>
+            <tr><td>Outro</td><td>16 bars</td><td>Back to just drums, perfect for mixing out</td><td>2:34 (about 33 s left)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The big idea: <b>play the outro of one track over the intro of the next.</b> Both are 16 bars of drums, so they overlap perfectly. You'll do exactly this in Lesson 3.</p>
+      <div class="tip">You can see the sections on the overview strip. The breakdown is the thin, quiet part in the middle, and the drop is the fat part after it.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="l1">
+      <span class="num">Lesson 1</span>
+      <h2>Play, pause &amp; cue</h2>
+      <div class="goal">Get comfortable starting, stopping and jumping around a track on deck A.</div>
+      <ol class="steps">
+        <li><b>Start deck A.</b>
+          <div class="do"><span class="pc">Press <kbd>F</kbd> (or click <span class="ui">▶</span> on deck A).</span><span class="ph">Tap <span class="ui">▶</span> on the <span class="a-col">A</span> side of the bottom bar.</span></div>
+          Watch the waveform scroll, the record spin and the beat dots count <i>1-2-3-4</i>. Nod your head to the beat.</li>
+        <li><b>Pause it,</b> then press play again. It carries on from where it stopped.
+          <div class="do"><span class="pc"><kbd>F</kbd> again.</span><span class="ph">Tap <span class="ui">❚❚</span>.</span></div></li>
+        <li><b>Jump somewhere else</b> by tapping the middle of the overview strip. You land in the breakdown. Tap near the right-hand end to hear the outro.
+          <div class="do"><span class="pc">Click the overview on deck A.</span><span class="ph">Open the <span class="ui">Deck A</span> tab and tap its overview strip.</span></div></li>
+        <li><b>Meet the CUE button.</b> The cue point is a bookmark (the orange <span class="ui" style="color:#f97316">CUE</span> marker), and it starts at the first beat of the song. While a track plays, pressing CUE <b>jumps back to the bookmark and stops</b>.
+          <div class="do"><span class="pc">While playing, press <kbd>D</kbd>.</span><span class="ph">While playing, tap <span class="ui">CUE</span> on the <span class="a-col">A</span> side of the bottom bar.</span></div></li>
+        <li><b>Preview from the cue.</b> When stopped at the cue point, <b>hold</b> CUE. The track plays as long as you hold it and snaps back when you let go. DJs use this to check how a track starts.
+          <div class="do"><span class="pc">Hold <kbd>D</kbd>, then let go.</span><span class="ph">Press and hold <span class="ui">CUE</span>, then let go.</span></div></li>
+        <li><b>Move the bookmark.</b> Pause somewhere in the song, then press CUE once. The bookmark moves there, snapped to the nearest beat (because <span class="ui">QUANTIZE</span> is on). Pressing CUE while playing now returns <i>there</i>.</li>
+      </ol>
+      <div class="tip">Hold-to-preview, then press play while still holding CUE, is a pro move: the track keeps playing when you release.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="l2">
+      <span class="num">Lesson 2</span>
+      <h2>The mixer</h2>
+      <div class="goal">Understand what each mixer control does to the sound.</div>
+      <p>Start deck A playing. Then try each control and <b>listen</b>.</p>
+      <ol class="steps">
+        <li><b>Volume fader</b>: how loud the deck is in the mix. Pull it all the way down, then back up.
+          <div class="do"><span class="pc">Hold <kbd>G</kbd> (down) and <kbd>T</kbd> (up) for deck A, or drag the fader.</span><span class="ph"><span class="ui">Mixer</span> tab → drag deck A's fader (the tall one at the bottom of the A column).</span></div></li>
+        <li><b>Crossfader</b>: left plays A, right plays B, the middle plays both. Slide it all the way right and A goes silent.
+          <div class="do"><span class="pc"><kbd>←</kbd> / <kbd>→</kbd> to move it, <kbd>B</kbd> to centre it.</span><span class="ph">Drag the crossfader in the bottom bar.</span></div>
+          Put it back in the <b>middle</b> for now.</li>
+        <li><b>EQ knobs</b>: <span class="ui">LOW</span> controls bass (kick and bassline), <span class="ui">MID</span> the middle (claps, chords), <span class="ui">HI</span> the treble (hi-hats). Turn each one fully left and right to hear its part disappear or get louder.
+          <div class="do"><span class="pc">Drag the knob up or down, or scroll over it. Double-click to reset to the middle.</span><span class="ph">Put your finger on the knob and slide up or down. Double-tap to reset.</span></div></li>
+        <li><b>Kill buttons</b> (<span class="ui">K</span>) next to each EQ instantly remove that band. Try killing the LOW: the kick and bass vanish, but the hats keep going.
+          <div class="do"><span class="pc"><kbd>Shift</kbd>+<kbd>Q</kbd> kills A's low, <kbd>Shift</kbd>+<kbd>W</kbd> the mids, <kbd>Shift</kbd>+<kbd>E</kbd> the highs. Press again to bring it back.</span><span class="ph">Tap the <span class="ui">K</span> next to <span class="ui">LOW</span> and tap again to bring it back.</span></div></li>
+        <li><b>Filter</b>: one knob that's off in the middle. Turn it <b>left</b> and the sound gets muffled, like music through a wall. Turn it <b>right</b> and it gets thin and tinny, with the bass removed.
+          <div class="do"><span class="pc"><kbd>Shift</kbd>+<kbd>Z</kbd> / <kbd>Shift</kbd>+<kbd>X</kbd> sweeps A's filter.</span><span class="ph">Slide the <span class="ui">FILTER</span> knob. Double-tap to reset.</span></div></li>
+        <li><b>TRIM and meters.</b> The coloured meter beside each fader shows the level. Aim for <b style="color:#22c55e">green</b> going into <b style="color:#eab308">yellow</b>, and avoid sitting in <b style="color:#ef4444">red</b>. If one song is much louder than another (common with your own files), lower its <span class="ui">TRIM</span> knob.</li>
+      </ol>
+      <div class="ear">With the LOW killed, hear how "empty" the track feels. That emptiness is the space you'll give the other track's bass in Lesson 3.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="l3">
+      <span class="num">Lesson 3 · the big one</span>
+      <h2>Your first mix (with SYNC)</h2>
+      <div class="goal">Blend Neon Arcade (deck A) into Pulse Theory (deck B) smoothly, with the beat never stopping.</div>
+      <p>SYNC does the speed-matching for you, so you can focus on <b>timing</b> and <b>blending</b>. (Lesson 4 teaches you to do it by ear.)</p>
+
+      <h3>Prepare (before you start the music)</h3>
+      <ol class="steps">
+        <li><b>Reset:</b> crossfader in the <b>middle</b>, every EQ in the middle, both filters in the middle. Both tracks should be loaded and stopped at their start. If a deck is somewhere else, press its CUE <i>while it's playing</i>: it jumps back to the first-beat bookmark and stops. Or reload the track from the Library.</li>
+        <li><b>Turn deck B's volume fader all the way down.</b> The audience shouldn't hear B until you're ready.
+          <div class="do"><span class="pc">Hold <kbd>H</kbd> until B's fader is at the bottom.</span><span class="ph"><span class="ui">Mixer</span> tab → drag B's fader to the bottom.</span></div></li>
+        <li><b>Kill deck B's bass.</b> Two kick drums and two basslines at once sound muddy.
+          <div class="do"><span class="pc"><kbd>Shift</kbd>+<kbd>U</kbd> (B's LOW kill lights up red).</span><span class="ph"><span class="ui">Mixer</span> tab → tap the <span class="ui">K</span> next to B's <span class="ui">LOW</span>.</span></div></li>
+        <li><b>Match B's speed to A.</b> Press SYNC on deck B. Its BPM changes from 126.0 to <b>124.0</b>, the same as A.
+          <div class="do"><span class="pc">Press <kbd>L</kbd>.</span><span class="ph"><span class="ui">Deck B</span> tab → <span class="ui">SYNC</span> (or SYNC in the bottom bar when the phone is sideways).</span></div></li>
+      </ol>
+
+      <h3>Mix (follow the clock on deck A)</h3>
+      <p>Start deck A (<kbd>F</kbd> / tap ▶ A) and enjoy the song. To skip the waiting while you practise, tap deck A's overview at about <b>80% of the way along</b> to land in the drop just before the outro. Then watch deck A's <b>remaining time</b>:</p>
+      <div class="mixplan">
+        <div><b class="t">A: −0:40</b><span><b>Get ready.</b> Hover over B's play button. Watch A's beat dots and count along: <i>1, 2, 3, 4…</i></span></div>
+        <div><b class="t">A: −0:33</b><span><b>Start B exactly on beat 1</b>, the moment A's <b>square</b> dot lights up and the waveform shows a bright bar line at the centre. A has just entered its drums-only outro.
+          <div class="do"><span class="pc">Press <kbd>J</kbd> on the "1", then immediately <kbd>L</kbd> (SYNC) to snap the beats together.</span><span class="ph">Tap <span class="ui">▶</span> on the <span class="b-col">B</span> side of the bottom bar on the "1", then tap B's <span class="ui">SYNC</span>.</span></div>
+          Nothing changes for the audience yet, because B's volume is down.</span></div>
+        <div><b class="t">−0:33 → −0:18</b><span><b>Bring B's volume up slowly</b>, over about 8 bars (15 seconds). You'll hear B's hi-hats and percussion join A's beat.
+          <div class="do"><span class="pc">Tap <kbd>Y</kbd> once or twice per bar until it's near the top.</span><span class="ph">Slowly drag B's volume fader up in the <span class="ui">Mixer</span> tab.</span></div></span></div>
+        <div><b class="t">A: −0:18</b><span><b>Swap the bass</b> on a bar line (square dot): kill A's LOW and un-kill B's LOW at the same moment. Now B's kick drives the music.
+          <div class="do"><span class="pc"><kbd>Shift</kbd>+<kbd>Q</kbd> then <kbd>Shift</kbd>+<kbd>U</kbd>, as close together as you can.</span><span class="ph">In the <span class="ui">Mixer</span> tab, tap A's LOW <span class="ui">K</span> and B's LOW <span class="ui">K</span> with two fingers at once.</span></div></span></div>
+        <div><b class="t">−0:18 → −0:03</b><span><b>Fade A out</b> gently: pull A's volume down, or slide the crossfader towards B.
+          <div class="do"><span class="pc">Hold <kbd>G</kbd>, or tap <kbd>→</kbd> a few times.</span><span class="ph">Slide the crossfader in the bottom bar towards <span class="b-col">B</span>.</span></div></span></div>
+        <div><b class="t">A ends</b><span><b>Done!</b> Pulse Theory is playing on its own, and its bassline arrives at 0:30 right on cue. Press pause on A and un-kill A's LOW so the deck is clean for the next track.</span></div>
+      </div>
+      <div class="ear">Two kicks that sound like <b>one</b> solid "boom". If you hear "ba-boom" (a flam) or a galloping rhythm, the beats aren't lined up: press B's SYNC again.</div>
+      <div class="warn">Starting B on the wrong beat (e.g. beat 3) still sounds in time but the phrases don't line up: B's changes will happen in odd places. Wait for the square dot.</div>
+      <div class="tip">Repeat this lesson until it feels boring. Then do it the other way round: load a new track onto A and mix from B back into A, using the mirrored keys (<kbd>F</kbd> <kbd>S</kbd> <kbd>T</kbd> <kbd>Shift</kbd>+<kbd>Q</kbd> for A).</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="l4">
+      <span class="num">Lesson 4</span>
+      <h2>Beatmatching by ear (no SYNC)</h2>
+      <div class="goal">Match the speed of two tracks yourself. This is the core skill that makes you a real DJ.</div>
+      <p>Two things can be wrong: the <b>speed</b> (tempo) and the <b>position</b> (one track a little ahead). You fix speed with the <b>pitch fader</b> and position with a <b>nudge</b>.</p>
+      <ol class="steps">
+        <li><b>Reload the starting pair:</b> pause both decks, then in the Library load <b>Neon Arcade</b> onto A and <b>Pulse Theory</b> onto B. Press the <span class="ui">0%</span> button under B's pitch fader so B is back at 126.0 BPM.</li>
+        <li><b>Start A, and start B on a "1"</b> with B's volume up and the crossfader in the middle, so you hear both. You'll hear them drift apart within a few bars: B is faster.</li>
+        <li><b>Slow B down with the pitch fader.</b> On this app, as on real DJ decks, the fader goes <b>up = slower (−)</b> and <b>down = faster (+)</b>. Aim for B to show <b>124.0</b>, which is about −1.6%.
+          <div class="do"><span class="pc">Hold <kbd>N</kbd> to slow B down, <kbd>M</kbd> to speed it up (0.05% per step).</span><span class="ph"><span class="ui">Deck B</span> tab → drag the pitch fader slightly up. Watch the BPM and % readout.</span></div></li>
+        <li><b>Line up the kicks with a nudge.</b> Even at the same speed, B may be a little ahead or behind. A nudge speeds up or slows down B only while you hold it, like pushing or holding back a spinning record.
+          <div class="do"><span class="pc">Hold <kbd>,</kbd> to slow B briefly, <kbd>.</kbd> to push it ahead.</span><span class="ph">Turn <span class="ui">VINYL</span> off on the Deck B tab, then spin B's jog wheel a little forward or back. Or hold <span class="ui">◀◀</span> / <span class="ui">▶▶</span>.</span></div></li>
+        <li><b>Keep listening.</b> If the kicks stay together, you're matched. If they slowly drift apart again, the speed still isn't quite right: fix it with tiny pitch changes, then nudge back into line.</li>
+      </ol>
+      <div class="ear">
+        <b>"Galloping" or "ba-boom"</b> means the beats are close but one is ahead.
+        Try nudging B <i>back</i>. If it gets better, B was ahead. If it gets worse, nudge it <i>forward</i> instead.
+        <b>A slow drift that keeps getting worse</b> means the speed is wrong, so use the pitch fader.
+      </div>
+      <div class="tip">To train your ears, use the BPM display at first. Then try to match without looking: get close by ear, and only then check the number. Easy practice pairs: Neon Arcade 124 ↔ Pulse Theory 126 ↔ Midnight Circuit 128.</div>
+      <div class="tip">The <span class="ui">±8%</span> button changes the pitch fader's range. Keep it at ±8% for precise control. Use ±16% only when two tracks are very far apart in speed.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="l5">
+      <span class="num">Lesson 5</span>
+      <h2>Cue points &amp; hot cues</h2>
+      <div class="goal">Prepare tracks so you can start them in exactly the right place, every time.</div>
+      <ol class="steps">
+        <li><b>Hot cues are 4 extra bookmarks</b> per deck (pads 1–4). Tap an empty pad to save the current position (snapped to the beat), and tap a saved pad to jump straight to it, even while playing.
+          <div class="do"><span class="pc">Deck A: <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> · Deck B: <kbd>7</kbd> <kbd>8</kbd> <kbd>9</kbd> <kbd>0</kbd>. Delete with <kbd>Shift</kbd>+number or right-click.</span><span class="ph">Tap the coloured pads on a Deck tab. <b>Press and hold</b> a saved pad to delete it.</span></div></li>
+        <li><b>Mark the important moments of a track.</b> A good habit: pad 1 = first beat, pad 2 = start of the breakdown, pad 3 = the drop, pad 4 = start of the outro. Find each moment on the overview, pause just before it, use the waveform to put the playhead exactly on the bright bar line, then press the pad.</li>
+        <li><b>Use hot cues to start a mix in the right place.</b> Want to bring B in at its drop instead of its intro? Jump B to hot cue 3 and start it on A's "1".</li>
+        <li><b>Fix a bad start.</b> If you started B in the wrong place, keep its volume down, tap its hot cue on a "1" to restart it in time, and carry on.</li>
+      </ol>
+      <div class="tip">Fine-tune a position when paused by dragging the big waveform left or right, or by scrolling the mouse over the record.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="l6">
+      <span class="num">Lesson 6</span>
+      <h2>EQ, filter &amp; echo transitions</h2>
+      <div class="goal">Learn three classic transitions so your mixes don't all sound the same.</div>
+
+      <h3>A. The bass swap (refined)</h3>
+      <p>The version from Lesson 3, done more smoothly. Instead of using kill buttons, turn B's LOW knob all the way left before you start, then over one bar turn A's LOW down while turning B's LOW back to the middle. Smooth blends sound more professional, and kill-button swaps sound punchier. Use both.</p>
+
+      <h3>B. The filter fade</h3>
+      <ol class="steps">
+        <li>With both tracks beatmatched and B at full volume, slowly turn <b>A's filter to the right</b> over 8 bars. A gets thinner and thinner until only a "tssk" remains.
+          <div class="do"><span class="pc">Tap <kbd>Shift</kbd>+<kbd>X</kbd> repeatedly or hold it, or drag A's FILTER knob.</span><span class="ph">Slide A's <span class="ui">FILTER</span> knob slowly to the right in the <span class="ui">Mixer</span> tab.</span></div></li>
+        <li>On the next bar line, pull A's volume down and reset its filter (double-click or double-tap the knob).</li>
+      </ol>
+      <p>Or do it the other way round: start B with its filter turned <b>left</b> (muffled) and slowly open it up as it comes in. This works brilliantly coming out of a breakdown.</p>
+
+      <h3>C. The echo out (a quick exit)</h3>
+      <ol class="steps">
+        <li>On deck A's <b>Effect</b> row, choose <span class="ui">Echo</span> and <span class="ui">1/2 beat</span>, and set <span class="ui">AMOUNT</span> to about halfway.</li>
+        <li>About a bar before you want A to end, turn the effect on.
+          <div class="do"><span class="pc">Press <kbd>A</kbd> (deck A's FX on/off).</span><span class="ph">Tap <span class="ui">FX</span> on the Deck A tab.</span></div></li>
+        <li>On the next "1", <b>pause deck A</b> (<kbd>F</kbd> / ▶ A) and start B with a hot cue or from its first beat at the same moment. A's echoes ring out over B's start like a fading tail.</li>
+        <li>Turn A's FX off afterwards.</li>
+      </ol>
+      <div class="tip">The echo out is your emergency exit. It's handy when two tracks don't mix well (very different speeds or clashing keys), because it lets you jump to the next track cleanly.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="l7">
+      <span class="num">Lesson 7</span>
+      <h2>Loops &amp; beat jumps</h2>
+      <div class="goal">Make a track longer when you need more time, and build tension.</div>
+      <ol class="steps">
+        <li><b>Turn on a loop.</b> The loop button repeats a few beats, starting from the beat you're on, seamlessly. The number on it (e.g. <span class="ui">LOOP 4</span>) is how many beats.
+          <div class="do"><span class="pc">Deck A: <kbd>W</kbd> on/off, <kbd>Q</kbd> halves, <kbd>E</kbd> doubles. Deck B: <kbd>I</kbd>, <kbd>U</kbd>, <kbd>O</kbd>.</span><span class="ph">Tap <span class="ui">LOOP</span>, <span class="ui">½</span> and <span class="ui">×2</span> on the Deck tab.</span></div></li>
+        <li><b>Use it to buy time.</b> A's outro is almost over and B isn't ready? Put an <b>8 or 16-beat</b> loop on A's outro (drums only). It now plays forever until you turn the loop off.</li>
+        <li><b>Build tension with a loop roll.</b> First save hot cue 3 on the first beat of the drop (Lesson 5). One bar before the end of the breakdown, loop 4 beats. Then halve the loop on each beat (2, then 1, then ½) so the repeats get faster and faster. On the next "1", tap hot cue 3: the deck jumps straight into the drop and the loop switches off.</li>
+        <li><b>Beat jump</b> moves forward or back exactly 4 beats without losing the beat. Use it to skip part of a section or fix a phrase that's one bar off.
+          <div class="do"><span class="pc">Deck A: <kbd>Shift</kbd>+<kbd>C</kbd> / <kbd>Shift</kbd>+<kbd>V</kbd>. Deck B: <kbd>Shift</kbd>+<kbd>,</kbd> / <kbd>Shift</kbd>+<kbd>.</kbd></span><span class="ph">Hot cues work best for jumping on a phone. Save one a bar or phrase ahead and tap it on the "1".</span></div></li>
+      </ol>
+      <div class="warn">Loops sound best on drums-only parts. Looping a melody halfway through a phrase can sound odd.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="l8">
+      <span class="num">Lesson 8</span>
+      <h2>Mixing in key (harmonic mixing)</h2>
+      <div class="goal">Choose tracks whose melodies sound good together.</div>
+      <p>Every track has a <b>key</b>, shown as a <b>Camelot code</b> like <b>8A</b>. Picture a clock face numbered 1–12. Two tracks sound good together when their codes are:</p>
+      <ul>
+        <li>the <b>same</b> (8A + 8A),</li>
+        <li><b>one step</b> around the clock (8A + 7A or 9A),</li>
+        <li>or the <b>same number with A↔B swapped</b> (8A + 8B).</li>
+      </ul>
+      <p>The Library does this for you: when a deck is playing, compatible keys and BPMs turn <b style="color:#22c55e">green</b>.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Track</th><th>Genre</th><th>BPM</th><th>Key</th><th>Mixes well with</th></tr></thead>
+          <tbody>
+            <tr><td>Neon Arcade</td><td>House</td><td>124</td><td>8A</td><td>Afterglow (8A), Pulse Theory &amp; Acid Rain (9A), Solar Drift (7A)</td></tr>
+            <tr><td>Pulse Theory</td><td>Tech House</td><td>126</td><td>9A</td><td>Acid Rain (9A), Neon Arcade &amp; Afterglow (8A), Glass Horizon (10A)</td></tr>
+            <tr><td>Afterglow</td><td>Nu-Disco</td><td>118</td><td>8A</td><td>Neon Arcade (8A), Solar Drift (7A), Pulse Theory (9A)</td></tr>
+            <tr><td>Solar Drift</td><td>Deep House</td><td>120</td><td>7A</td><td>Afterglow &amp; Neon Arcade (8A)</td></tr>
+            <tr><td>Acid Rain</td><td>Acid Techno</td><td>132</td><td>9A</td><td>Pulse Theory (9A), Glass Horizon (10A)</td></tr>
+            <tr><td>Glass Horizon</td><td>Trance</td><td>138</td><td>10A</td><td>Acid Rain &amp; Pulse Theory (9A)</td></tr>
+            <tr><td>Midnight Circuit</td><td>Techno</td><td>128</td><td>4A</td><td>Speed matches the house tracks; mix on the drums-only parts</td></tr>
+            <tr><td>Velocity</td><td>Drum &amp; Bass</td><td>174</td><td>6A</td><td>Solar Drift's key (7A); Low Tide's tempo in double time, but in a different key</td></tr>
+            <tr><td>Low Tide</td><td>Lo-fi Hip Hop</td><td>88</td><td>5B</td><td>Velocity's tempo in half time (different key, so mix on the drums); great as a set opener</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ear">Try mixing Neon Arcade's drop over Afterglow's drop (same key: lovely), then over Midnight Circuit's (different key: the melodies clash). Your ears will learn the difference fast.</div>
+      <div class="tip">Clashing keys are fine during drums-only intros and outros. Keys only matter when both tracks are playing melodies at the same time.</div>
+      <div class="tip"><b>Double time:</b> Low Tide (88) is almost exactly half the speed of Velocity (174). SYNC understands this and matches them so that one Low Tide beat lines up with two Velocity beats. It's an advanced but very cool transition.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="l9">
+      <span class="num">Lesson 9</span>
+      <h2>Headphone cueing (like a real booth)</h2>
+      <div class="goal">Hear the next track privately while the audience hears only the mix.</div>
+      <p>In a club, the DJ listens to the next track in headphones before anyone else hears it. With <b>Split Cue</b>, the app copies this with one pair of headphones: <b>left ear = your private cue</b>, <b>right ear = what the audience hears</b>.</p>
+      <ol class="steps">
+        <li>Put on headphones (this doesn't work on speakers).</li>
+        <li>Turn on <span class="ui">🎧 Split Cue</span> at the top of the screen (the 🎧 icon on a phone).</li>
+        <li>Press deck B's 🎧 button in the mixer to send it to your left ear.
+          <div class="do"><span class="pc">Press <kbd>P</kbd> (deck A's is <kbd>R</kbd>).</span><span class="ph"><span class="ui">Mixer</span> tab → tap the 🎧 under B's FILTER.</span></div></li>
+        <li>With B's volume fader <b>down</b>, play B and beatmatch it. You'll hear it in your left ear only, while the right ear plays A as normal.</li>
+        <li>When it's in time, bring B's fader up. Now it reaches the audience too (right ear).</li>
+      </ol>
+      <div class="tip">Many DJs keep one headphone cup on and one off. Split Cue gives you the same feeling.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="l10">
+      <span class="num">Lesson 10</span>
+      <h2>Scratching basics</h2>
+      <div class="goal">Do your first "baby scratch".</div>
+      <ol class="steps">
+        <li>Make sure <span class="ui">VINYL</span> is on (green) for the deck. In vinyl mode, touching the record stops it, just like a real turntable.</li>
+        <li>Switch the crossfader curve to <span class="ui">Curve: Sharp (scratch)</span> in the mixer. Now the crossfader cuts in and out instantly at its edges.</li>
+        <li>Find a short, punchy sound such as a clap or a chord stab. Save it as a hot cue so you can return to it.</li>
+        <li><b>Baby scratch:</b> press play, grab the record (click and hold, or put your finger on it), and move it <b>back and forth</b> in a steady rhythm along with the beat of the other deck. Let go to let the record carry on.
+          <div class="do"><span class="pc">Click and drag around the record, or drag the big waveform left and right.</span><span class="ph">Put a finger on the record (or the big waveform) and rub it back and forth.</span></div></li>
+        <li>Once that feels good, add crossfader cuts: open the crossfader on the forward stroke and cut it on the backward stroke. That's the start of the "chop" and "transform" scratches.</li>
+      </ol>
+      <div class="tip">Scratching on a phone works well: use one thumb on the record and the other on the bottom-bar crossfader.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="l11">
+      <span class="num">Lesson 11 · graduation</span>
+      <h2>Play &amp; record a full set</h2>
+      <div class="goal">Plan, play and record a 15–20 minute mix, then listen back.</div>
+      <ol class="steps">
+        <li><b>Plan your order.</b> A smooth beginner set that rises in energy and stays in key:
+          <div class="table-wrap" style="margin-top:8px">
+            <table>
+              <thead><tr><th>#</th><th>Track</th><th>BPM · Key</th><th>Suggested transition</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Afterglow</td><td>118 · 8A</td><td>Opener</td></tr>
+                <tr><td>2</td><td>Neon Arcade</td><td>124 · 8A</td><td>Bass swap, outro over intro (Lesson 3)</td></tr>
+                <tr><td>3</td><td>Pulse Theory</td><td>126 · 9A</td><td>Filter fade (Lesson 6B)</td></tr>
+                <tr><td>4</td><td>Acid Rain</td><td>132 · 9A</td><td>Bass swap, then nudge the tempo up</td></tr>
+                <tr><td>5</td><td>Glass Horizon</td><td>138 · 10A</td><td>Loop roll into the drop (Lesson 7) or echo out</td></tr>
+              </tbody>
+            </table>
+          </div>
+          The tempo climbs 118 → 138. Each time, sync the incoming track to the playing one. Once the old track has gone, slowly ease the pitch fader back towards 0% over a minute or two, so the set keeps gathering energy.</li>
+        <li><b>Load the next track only after the previous transition is finished.</b> The app won't let you load onto a deck that's playing; that's to protect you from accidentally stopping the music.
+          <div class="do"><span class="pc">Use <kbd>↑</kbd> <kbd>↓</kbd> to pick a track, then <kbd>[</kbd> to load it onto A or <kbd>]</kbd> onto B. Or click <span class="ui">A</span> / <span class="ui">B</span> in the Library.</span><span class="ph"><span class="ui">Library</span> tab → tap <span class="ui">A</span> or <span class="ui">B</span> on the track's row.</span></div></li>
+        <li><b>Record.</b> Tap <span class="ui">● REC</span> at the top before your first track starts. Tap it again at the end and your mix downloads as an audio file.</li>
+        <li><b>Listen back</b> the next day, away from the decks. Note where the beats drifted, where it got muddy (two basslines) and where it got too loud. Then practise just those moments.</li>
+      </ol>
+      <div class="tip">Want different music? Use <span class="ui">+ Add your own music</span> in the Library to load royalty-free tracks, for example from Pixabay Music or the Free Music Archive. The app detects their BPM automatically.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="plan">
+      <span class="num">Practice plan</span>
+      <h2>7-day practice plan (20 minutes a day)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Day</th><th>Practise</th><th>You're ready to move on when…</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Lessons 1–2, then Lesson 3 three times</td><td>You can start B on the "1" without looking at the dots</td></tr>
+            <tr><td>2</td><td>Lesson 3 in both directions (A→B and B→A) with different track pairs</td><td>Your bass swaps land exactly on a bar line</td></tr>
+            <tr><td>3</td><td>Lesson 4: beatmatch Neon Arcade ↔ Pulse Theory by ear</td><td>You can tell which track is ahead from the "ba-boom"</td></tr>
+            <tr><td>4</td><td>Lesson 4 again with bigger gaps (Afterglow 118 ↔ Neon Arcade 124) and Lesson 5</td><td>You can match without looking at the BPM</td></tr>
+            <tr><td>5</td><td>Lessons 6–7: one filter fade, one echo out and one loop roll</td><td>Each transition sounds deliberate, not accidental</td></tr>
+            <tr><td>6</td><td>Lessons 8–10, then make a 3-track mini set</td><td>You choose tracks by key and hear the difference</td></tr>
+            <tr><td>7</td><td>Lesson 11: record the full 5-track set</td><td>You'd happily send the recording to a friend 🎉</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Before every mix, check</h3>
+      <ul class="checklist">
+        <li>The incoming deck's volume is down and its LOW is killed or turned down</li>
+        <li>The incoming track is synced or beatmatched</li>
+        <li>You know where the next phrase starts (count the bright bar lines)</li>
+        <li>The meters aren't in the red</li>
+        <li>You've un-killed and reset the EQs on the deck that just finished</li>
+      </ul>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="trouble">
+      <span class="num">Help</span>
+      <h2>Common mistakes &amp; fixes</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Problem</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td>No sound at all</td><td>Tap <b>Start the session</b>. Check the MASTER knob, the crossfader position (all the way to one side mutes the other deck) and that the deck's volume fader is up. On iPhone, turn off Silent Mode and raise the media volume.</td></tr>
+            <tr><td>"Deck A is playing — pause it first"</td><td>That's a safety feature. You can only load onto a deck that's stopped.</td></tr>
+            <tr><td>The beats sound like a horse galloping</td><td>The tracks aren't lined up. Press SYNC on the incoming deck, or nudge it (Lesson 4).</td></tr>
+            <tr><td>It sounds muddy and boomy during a mix</td><td>Two basslines at once. Kill or turn down one deck's LOW.</td></tr>
+            <tr><td>The meters are red or the sound distorts</td><td>Lower the volume faders or the TRIM of the loud deck. Louder isn't better.</td></tr>
+            <tr><td>Total disaster (a "trainwreck")</td><td>Stay calm: slam the crossfader to the good track (<kbd>Shift</kbd>+<kbd>←</kbd> / <kbd>Shift</kbd>+<kbd>→</kbd>, or drag it on a phone), fix the other deck, and try again on the next phrase. Every DJ has done it.</td></tr>
+            <tr><td>A track takes a few seconds to load</td><td>Normal: the app composes the music as it loads. Phones take a little longer.</td></tr>
+            <tr><td>Sound stopped after locking the phone</td><td>Phones pause web audio when locked. Unlock and tap the screen, and it resumes.</td></tr>
+            <tr><td>I can't find SYNC on my phone</td><td>Open the Deck A or Deck B tab, or turn the phone sideways to show it in the bottom bar.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="glossary">
+      <span class="num">Words</span>
+      <h2>Glossary</h2>
+      <dl class="glossary">
+        <dt>BPM</dt><dd>Beats per minute: how fast a track is.</dd>
+        <dt>Beat / bar / phrase</dt><dd>One kick / 4 beats / 8–16 bars. Music changes at phrase boundaries.</dd>
+        <dt>Downbeat ("the 1")</dt><dd>The first beat of a bar, shown by the square dot and the bright line.</dd>
+        <dt>Beatmatching</dt><dd>Making two tracks play at the same speed with their beats lined up.</dd>
+        <dt>Pitch / tempo fader</dt><dd>Changes a deck's speed. Up = slower, down = faster.</dd>
+        <dt>Nudge</dt><dd>A brief speed-up or slow-down to line up beats without changing the tempo.</dd>
+        <dt>SYNC</dt><dd>Automatic beatmatching: matches the speed and lines up the beat.</dd>
+        <dt>Cue / hot cue</dt><dd>Bookmarks in a track that you can jump to instantly.</dd>
+        <dt>Quantize</dt><dd>Snaps cues and loops to the nearest beat so they're always in time.</dd>
+        <dt>EQ / kill</dt><dd>Bass, mid and treble controls / a button that removes a band completely.</dd>
+        <dt>Filter</dt><dd>Sweeps the sound to muffled (left) or thin (right).</dd>
+        <dt>Crossfader</dt><dd>The sideways slider that blends from deck A to deck B.</dd>
+        <dt>Transition</dt><dd>The moment you blend from one track into the next.</dd>
+        <dt>Bass swap</dt><dd>Switching which track's bass is playing, right on a bar line.</dd>
+        <dt>Camelot key</dt><dd>A simple code (like 8A) that tells you which tracks sound good together.</dd>
+        <dt>Split cue / PFL</dt><dd>Listening to a track in headphones before the audience hears it.</dd>
+        <dt>Trainwreck</dt><dd>A mix where the beats crash into each other. It happens to everyone.</dd>
+      </dl>
+    </section>
+
+    <!-- ============================================================ -->
+    <section class="lesson" id="cheat">
+      <span class="num">Reference</span>
+      <h2>Cheat sheet</h2>
+      <h3 class="pc">💻 Keyboard</h3>
+      <div class="table-wrap pc">
+        <table>
+          <thead><tr><th>Action</th><th class="a-col">Deck A</th><th class="b-col">Deck B</th></tr></thead>
+          <tbody>
+            <tr><td>Play / pause</td><td><kbd>F</kbd></td><td><kbd>J</kbd></td></tr>
+            <tr><td>Cue (hold to preview)</td><td><kbd>D</kbd></td><td><kbd>K</kbd></td></tr>
+            <tr><td>Sync</td><td><kbd>S</kbd></td><td><kbd>L</kbd></td></tr>
+            <tr><td>Hot cues (Shift = delete)</td><td><kbd>1</kbd>–<kbd>4</kbd></td><td><kbd>7</kbd>–<kbd>0</kbd></td></tr>
+            <tr><td>Loop ½ / on-off / ×2</td><td><kbd>Q</kbd> <kbd>W</kbd> <kbd>E</kbd></td><td><kbd>U</kbd> <kbd>I</kbd> <kbd>O</kbd></td></tr>
+            <tr><td>Kill low / mid / high</td><td><kbd>Shift</kbd>+<kbd>Q</kbd> <kbd>W</kbd> <kbd>E</kbd></td><td><kbd>Shift</kbd>+<kbd>U</kbd> <kbd>I</kbd> <kbd>O</kbd></td></tr>
+            <tr><td>Tempo − / +</td><td><kbd>Z</kbd> <kbd>X</kbd></td><td><kbd>N</kbd> <kbd>M</kbd></td></tr>
+            <tr><td>Filter</td><td><kbd>Shift</kbd>+<kbd>Z</kbd> <kbd>X</kbd></td><td><kbd>Shift</kbd>+<kbd>N</kbd> <kbd>M</kbd></td></tr>
+            <tr><td>Nudge slower / faster</td><td><kbd>C</kbd> <kbd>V</kbd></td><td><kbd>,</kbd> <kbd>.</kbd></td></tr>
+            <tr><td>Beat jump −4 / +4</td><td><kbd>Shift</kbd>+<kbd>C</kbd> <kbd>V</kbd></td><td><kbd>Shift</kbd>+<kbd>,</kbd> <kbd>.</kbd></td></tr>
+            <tr><td>Volume up / down</td><td><kbd>T</kbd> <kbd>G</kbd></td><td><kbd>Y</kbd> <kbd>H</kbd></td></tr>
+            <tr><td>Effect on / off</td><td><kbd>A</kbd></td><td><kbd>;</kbd></td></tr>
+            <tr><td>Headphone cue</td><td><kbd>R</kbd></td><td><kbd>P</kbd></td></tr>
+            <tr><td>Crossfader</td><td colspan="2"><kbd>←</kbd> <kbd>→</kbd> · <kbd>B</kbd> centre · <kbd>Shift</kbd>+arrow = slam</td></tr>
+            <tr><td>Library</td><td colspan="2"><kbd>↑</kbd> <kbd>↓</kbd> choose · <kbd>[</kbd> load to A · <kbd>]</kbd> load to B</td></tr>
+            <tr><td>Help in the app</td><td colspan="2"><kbd>?</kbd></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3 class="ph">📱 Touch</h3>
+      <div class="table-wrap ph">
+        <table>
+          <thead><tr><th>Do this</th><th>How</th></tr></thead>
+          <tbody>
+            <tr><td>Play, cue, sync, crossfader</td><td>Bottom bar (SYNC shows there when the phone is sideways, and is always on the Deck tabs)</td></tr>
+            <tr><td>Turn a knob</td><td>Slide your finger up or down on it · double-tap to reset</td></tr>
+            <tr><td>Move a fader</td><td>Drag it, or tap the track · double-tap to reset</td></tr>
+            <tr><td>Scratch</td><td>Finger on the record (VINYL on) or the big waveform</td></tr>
+            <tr><td>Nudge</td><td>VINYL off, then spin the record; or hold ◀◀ / ▶▶</td></tr>
+            <tr><td>Hot cue</td><td>Tap to set or jump · press and hold to delete</td></tr>
+            <tr><td>Two things at once</td><td>Use two fingers, e.g. the crossfader and a kill button</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      Have fun, and remember: every DJ trainwrecked their first hundred mixes. 🎧<br>
+      <a href="index.html" target="_blank" rel="noopener">Open the decks ↗</a>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      var KEY = 'djguide-mode';
+      var touch = window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+      var saved = null;
+      try { saved = localStorage.getItem(KEY); } catch (e) { /* storage unavailable */ }
+      function set(mode) {
+        document.body.className = 'mode-' + mode;
+        Array.prototype.forEach.call(document.querySelectorAll('.mode button'), function (b) {
+          b.classList.toggle('on', b.getAttribute('data-mode') === mode);
+        });
+        try { localStorage.setItem(KEY, mode); } catch (e) { /* storage unavailable */ }
+      }
+      Array.prototype.forEach.call(document.querySelectorAll('.mode button'), function (b) {
+        b.addEventListener('click', function () { set(b.getAttribute('data-mode')); });
+      });
+      set(saved || (touch ? 'phone' : 'pc'));
+    })();
+  </script>
+</body>
+</html>

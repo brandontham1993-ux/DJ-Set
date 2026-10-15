@@ -466,6 +466,17 @@ kbd {
   user-select: text;
 }
 .help-card h2 { font-size: 15px; margin: 4px 0 10px; }
+.start-hint a, .guide-link { color: var(--a); }
+.guide-link {
+  display: block;
+  margin: 0 32px 14px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #10202a;
+  border: 1px solid #23506b;
+  font-weight: 700;
+  text-decoration: none;
+}
 .help-close { position: absolute; top: 12px; right: 12px; background: none; border: 0; font-size: 18px; cursor: pointer; color: var(--muted); }
 .keytable { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 13px; }
 .keytable th { text-align: left; font-size: 12px; padding: 4px 8px; border-bottom: 1px solid var(--line); }
