@@ -1,0 +1,11 @@
+{
+  "name": "dj-practice-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser-based two-deck DJ practice app with copyright-free generated music, controlled by keyboard and mouse.",
+  "scripts": {
+    "start": "npx --yes http-server -p 8080 -c-1 .",
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "license": "MIT"
+}
