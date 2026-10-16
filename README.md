@@ -13,6 +13,8 @@ You don't need to install or build anything.
 - **Local server:** run `npm start`, then open <http://localhost:8080>.
 - **GitHub Pages:** enable Pages for this repo (Settings → Pages → deploy from branch). The site works as-is.
 
+**New to DJing?** Follow the [step-by-step beginner's guide](guide.html). It's also live at <https://brandontham1993-ux.github.io/DJ-Set/guide.html>.
+
 Click **Start the session**. Deck A loads *Neon Arcade* and deck B loads *Pulse Theory*, ready to mix. Press **?** for every shortcut.
 Headphones are recommended.
 
